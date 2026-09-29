@@ -95,7 +95,7 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
 .foot{color:var(--muted);font-size:13px;margin-top:20px}
 .conf{position:fixed;top:-20px;width:10px;height:14px;z-index:9;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
-@media (prefers-reduced-motion:reduce){.bike,.wh,.rig,.wheelie,.dash,.city,.spark{animation:none}}
+
 
 .how{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 14px;text-align:left}
 .how ol{margin:0 0 10px;padding-left:20px;font-size:14px;color:var(--muted)}
@@ -228,7 +228,8 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
 
 <script>
 // ====== EDITE AQUI ======
-var GOOGLE_REVIEW_URL = "https://www.google.com/maps?cid=2915995482714807685";
+var GOOGLE_REVIEW_URL = "https://g.page/r/CYUd3CFxsncoEBM/review";
+var STORE_URL = "https://www.google.com/maps?cid=2915995482714807685";
 var WHATSAPP = "5573988424350";
 // ========================
 function $(id){return document.getElementById(id)}
@@ -268,7 +269,7 @@ for(var i=1;i<=5;i++){(function(n){var b=document.createElement("button");b.text
   b.onclick=function(){sb.forEach(function(x,k){x.className=k<n?"on":""});setTimeout(openReview,250)};stars.appendChild(b);sb.push(b)})(i)}
 function openReview(){window.open(GOOGLE_REVIEW_URL,"_blank","noopener");afterGo()}
 function afterGo(){$("already").classList.remove("hide")}
-$("go").href=GOOGLE_REVIEW_URL;$("openStore").href=GOOGLE_REVIEW_URL;
+$("go").href=GOOGLE_REVIEW_URL;$("openStore").href=STORE_URL;
 $("go").onclick=function(){setTimeout(afterGo,400)};
 $("already").onclick=function(){step("p2")};
 
