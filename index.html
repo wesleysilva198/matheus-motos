@@ -109,6 +109,14 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
 .leg li{display:flex;gap:8px;align-items:flex-start;margin:6px 0;color:var(--text)}
 .leg em{flex:none;width:22px;height:22px;border-radius:50%;background:#e10f14;color:#fff;font-style:normal;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
 .warn{font-size:13px;color:#ffd76a;margin:10px 0 0}
+
+.guide{list-style:none;counter-reset:g;padding:0;margin:0 0 16px;text-align:left}
+.guide li{counter-increment:g;position:relative;padding:10px 10px 10px 48px;margin:8px 0;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;font-size:15px;line-height:1.35}
+.guide li:before{content:counter(g);position:absolute;left:10px;top:50%;margin-top:-15px;width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.guide .hot{border-color:#ffd76a;background:rgba(245,179,1,.12)}
+.guide .hot:before{background:#f5b301;color:#000}
+.guide em{color:#ffd76a;font-style:normal;font-weight:800}
+.tip{font-size:13px;color:var(--muted);margin:0 0 10px}
 </style>
 </head>
 <body>
@@ -138,7 +146,14 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
 
     <div id="p1">
       <h2>Gostou do atendimento?</h2>
-      <p>Toque nas estrelas, avalie a loja no Google e volte aqui pra pegar seu desconto.</p>
+      <p>Siga os passos abaixo. É rápido!</p>
+      <ol class="guide">
+        <li>Toque no botão vermelho <b>⭐ Avaliar no Google</b> aqui embaixo.</li>
+        <li>Escolha as <b>estrelas</b> e escreva um comentário curto.</li>
+        <li class="hot">Toque no botão azul <b>“POSTAR”</b>. <em>Sem postar não vale!</em></li>
+        <li>Vai aparecer uma tela de parabéns do Google. <b>Feche ela</b> e <b>volte para esta página</b>.</li>
+        <li>Toque em <b>“✅ Já avaliei, continuar”</b> e envie o print.</li>
+      </ol>
       <div class="stars" id="stars"></div>
       <a class="btn" id="go" href="#" target="_blank" rel="noopener">⭐ Avaliar no Google</a>
       <button class="btn ghost hide" id="already" style="margin-top:10px">✅ Já avaliei, continuar</button>
@@ -153,6 +168,7 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
           <li>A sua avaliação aparece no topo da lista.</li>
           <li>Tire o print <b>igual ao exemplo</b> abaixo.</li>
         </ol>
+        <p class="tip">📱 <b>Como tirar print:</b> no <b>Android</b>, segure <b>Ligar + Volume baixo</b>. No <b>iPhone</b>, aperte <b>Botão lateral + Volume alto</b> ao mesmo tempo.</p>
         <a class="btn ghost" id="openStore" href="#" target="_blank" rel="noopener" style="font-size:15px;padding:12px">📍 Abrir a loja no Google</a>
         <div class="ex" style="margin-top:12px">
           <span class="tagex">EXEMPLO</span>
@@ -174,6 +190,7 @@ h1{margin:14px 0 2px;font-size:28px;letter-spacing:2px;text-transform:uppercase}
       <button class="btn ghost" id="pick">📷 Escolher print</button>
       <button class="btn hide" id="send" style="margin-top:10px">Enviar print</button>
       <div class="msg" id="msg"></div>
+      <a class="btn ghost" href="https://wa.me/5573988424350?text=Oi!%20Estou%20com%20dificuldade%20para%20enviar%20o%20print%20da%20avalia%C3%A7%C3%A3o." target="_blank" rel="noopener" style="font-size:15px;padding:12px;margin-top:10px">🆘 Precisa de ajuda? Chame no WhatsApp</a>
     </div>
 
     <div id="p2b" class="hide scan">
