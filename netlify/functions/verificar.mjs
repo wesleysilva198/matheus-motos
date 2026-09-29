@@ -94,7 +94,7 @@ async function ask(img) {
   }
 }
 
-async function emitir(store, verificado, chave) {
+async function emitir(store, verificado, chave, image) {
   const pct = randomInt(0, 100) < CHANCE_10 ? 10 : 5;
   const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "MM-";
@@ -103,6 +103,7 @@ async function emitir(store, verificado, chave) {
   const expTxt = exp.toLocaleDateString("pt-BR", { timeZone: "America/Bahia" });
   await store.setJSON("cupom/" + code, { pct, exp: exp.toISOString(), expTxt, usado: null, verificado, criado: new Date().toISOString() });
   if (chave) await store.set(chave, code);
+  if (image) await store.set("img/" + code, image);
   return { pct, code, exp: expTxt };
 }
 
@@ -125,7 +126,7 @@ export default async (req) => {
     // Se a IA estiver fora do ar ou sem cota, NÃO trava o cliente:
     // libera o cupom marcado como "não verificado" e o atendente confere o print no balcão.
     console.error("IA indisponível, cupom manual:", e.message);
-    const coupon = await emitir(store, false, null);
+    const coupon = await emitir(store, false, null, image);
     return json({ ok: true, manual: true, coupon });
   }
 
@@ -142,7 +143,7 @@ export default async (req) => {
   const chave = "rev/" + createHash("sha256").update(nome + "|" + texto).digest("hex");
   if (await store.get(chave)) return no("Essa avaliação já foi usada para ganhar um desconto.");
 
-  const coupon = await emitir(store, true, chave);
+  const coupon = await emitir(store, true, chave, image);
   return json({ ok: true, coupon });
 };
 
