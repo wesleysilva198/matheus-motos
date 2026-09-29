@@ -24,7 +24,7 @@ const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
 const no = (reason, status = 200) => json({ ok: false, reason }, status);
 
-async function ask(imageB64) {
+async function askClaude(imageB64) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -52,9 +52,34 @@ async function ask(imageB64) {
   return JSON.parse(m[0]);
 }
 
+function parse(text) {
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("Resposta sem JSON: " + text);
+  return JSON.parse(m[0]);
+}
+
+async function askGemini(imageB64) {
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ inline_data: { mime_type: "image/jpeg", data: imageB64 } }, { text: PROMPT }] }],
+      generationConfig: { temperature: 0, responseMimeType: "application/json" },
+    }),
+  });
+  if (!res.ok) throw new Error("Gemini " + res.status + " " + (await res.text()));
+  const data = await res.json();
+  const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+  return parse(parts.map((p) => p.text || "").join(""));
+}
+
+// Usa o Gemini se existir GEMINI_API_KEY; senão usa o Claude (ANTHROPIC_API_KEY)
+const ask = (img) => (process.env.GEMINI_API_KEY ? askGemini(img) : askClaude(img));
+
 export default async (req) => {
   if (req.method !== "POST") return no("Método inválido.", 405);
-  if (!process.env.ANTHROPIC_API_KEY) return no("Servidor sem chave configurada.", 500);
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.GEMINI_API_KEY) return no("Servidor sem chave configurada.", 500);
 
   let body;
   try { body = await req.json(); } catch { return no("Envio inválido.", 400); }
