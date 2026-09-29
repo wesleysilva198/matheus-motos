@@ -13,11 +13,12 @@ const PROMPT = `You are checking a phone screenshot that a customer says shows a
 Answer with ONLY a JSON object, no markdown:
 {"is_google_review":boolean,"business_matches":boolean,"stars":number|null,"reviewer_name":string|null,"review_text_start":string|null,"age_days":number|null,"seems_edited":boolean}
 - is_google_review: true only if it is a genuine-looking Google Maps/Search review interface showing a review posted by a user.
+- The screenshot may come from Android or iPhone (Safari/Google Maps web page). Labels vary: "Sua avaliação", "Avaliações", "agora mesmo", "há 2 minutos", "minutos atrás". The business name may appear only in the top bar or page title, not next to the review.
 - business_matches: the reviewed business is "${NOME_LOJA}" (small typos are fine).
 - stars: number of filled stars (1-5) of that review.
 - reviewer_name: the reviewer's name as shown.
 - review_text_start: first 60 characters of the review text ("" if there is no text).
-- age_days: age of the review from its relative date ("agora" or "há 5 minutos" = 0, "há 2 dias" = 2, "há 1 semana" = 7, "há 1 mês" = 30). null if not visible.
+- age_days: age of the review from its relative date ("agora", "agora mesmo" or "há 5 minutos" = 0, "há 2 dias" = 2, "há 1 semana" = 7, "há 1 mês" = 30). null if not visible.
 - seems_edited: true if the image looks digitally edited, fabricated, or is a photo of another screen.`;
 
 const json = (obj, status = 200) =>
@@ -44,7 +45,7 @@ async function askClaude(imageB64) {
       }],
     }),
   });
-  if (!res.ok) throw new Error("API " + res.status + " " + (await res.text()));
+  if (!res.ok) { const e = new Error("API " + res.status + " " + (await res.text())); e.status = res.status; throw e; }
   const data = await res.json();
   const text = (data.content || []).map((b) => b.text || "").join("");
   const m = text.match(/\{[\s\S]*\}/);
@@ -68,14 +69,24 @@ async function askGemini(imageB64) {
       generationConfig: { temperature: 0, responseMimeType: "application/json" },
     }),
   });
-  if (!res.ok) throw new Error("Gemini " + res.status + " " + (await res.text()));
+  if (!res.ok) { const e = new Error("Gemini " + res.status + " " + (await res.text())); e.status = res.status; throw e; }
   const data = await res.json();
   const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
   return parse(parts.map((p) => p.text || "").join(""));
 }
 
 // Usa o Gemini se existir GEMINI_API_KEY; senão usa o Claude (ANTHROPIC_API_KEY)
-const ask = (img) => (process.env.GEMINI_API_KEY ? askGemini(img) : askClaude(img));
+async function withRetry(fn) {
+  try { return await fn(); }
+  catch (e) {
+    if ([429, 500, 502, 503, 504].includes(e.status)) {
+      await new Promise((r) => setTimeout(r, 2500));
+      return await fn();
+    }
+    throw e;
+  }
+}
+const ask = (img) => withRetry(() => (process.env.GEMINI_API_KEY ? askGemini(img) : askClaude(img)));
 
 export default async (req) => {
   if (req.method !== "POST") return no("Método inválido.", 405);
@@ -89,7 +100,11 @@ export default async (req) => {
 
   let r;
   try { r = await ask(image); }
-  catch (e) { console.error(e); return no("Não consegui analisar agora. Tente de novo em instantes.", 502); }
+  catch (e) {
+    console.error(e);
+    if (e.status === 429) return no("Muitas verificações ao mesmo tempo. Espere 1 minuto e tente de novo.", 429);
+    return no("Não consegui analisar agora. Tente de novo em instantes.", 502);
+  }
 
   if (!r.is_google_review) return no("Não parece um print de avaliação do Google. Envie o print da sua avaliação publicada.");
   if (!r.business_matches) return no("A avaliação não é da " + NOME_LOJA + ". Confira se avaliou a loja certa.");
