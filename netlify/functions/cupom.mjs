@@ -18,11 +18,11 @@ export default async (req) => {
     if (vencido) return j({ ok: false, msg: "Cupom vencido em " + c.expTxt });
     c.usado = new Date().toISOString();
     await store.setJSON(key, c);
-    return j({ ok: true, msg: "✅ Desconto de " + c.pct + "% aplicado. Cupom baixado.", pct: c.pct });
+    return j({ ok: true, msg: "✅ Desconto de " + c.pct + "% aplicado. Cupom baixado." + (c.verificado === false ? " (Cupom sem verificação automática, você conferiu o print?)" : ""), pct: c.pct });
   }
   return j({
     ok: true, pct: c.pct,
-    msg: c.usado ? "⚠️ JÁ USADO" : vencido ? "⚠️ VENCIDO em " + c.expTxt : "✅ Válido: " + c.pct + "% de desconto (até " + c.expTxt + ")",
+    msg: (c.usado ? "⚠️ JÁ USADO" : vencido ? "⚠️ VENCIDO em " + c.expTxt : "✅ Válido: " + c.pct + "% de desconto (até " + c.expTxt + ")") + (c.verificado === false ? " — ⚠️ NÃO VERIFICADO pelo sistema: confira o print da avaliação antes de dar o desconto" : ""),
   });
 };
 
