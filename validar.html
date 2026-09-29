@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validar cupom — Matheus Motos</title>
+<style>
+body{margin:0;background:#0b0b0d;color:#f5f5f5;font-family:system-ui,sans-serif;padding:24px;max-width:420px;margin:0 auto}
+h1{font-size:22px}input,button{width:100%;padding:14px;border-radius:10px;border:1px solid #333;font-size:18px;margin-bottom:10px;box-sizing:border-box}
+input{background:#1a1a1d;color:#fff;text-transform:uppercase}button{background:#e10f14;color:#fff;border:0;font-weight:700}
+button.b{background:#1e7d3c}#r{font-size:20px;margin-top:14px;min-height:30px}
+</style></head><body>
+<h1>🏍️ Validar cupom</h1>
+<input id="pin" type="password" placeholder="PIN do atendente" style="text-transform:none">
+<input id="code" placeholder="Código do cupom (MM-XXXX)">
+<button onclick="go('consultar')">Consultar</button>
+<button class="b" onclick="go('usar')">Dar baixa (aplicar desconto)</button>
+<div id="r"></div>
+<script>
+async function go(acao){
+  var r=document.getElementById("r");r.textContent="…";
+  try{var res=await fetch("/api/cupom",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({pin:document.getElementById("pin").value,code:document.getElementById("code").value,acao:acao})});
+    var d=await res.json();r.textContent=d.msg||"";}catch(e){r.textContent="Erro de conexão"}
+}
+</script></body></html>
